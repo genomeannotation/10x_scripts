@@ -35,10 +35,12 @@ for line in sys.stdin:
 # The code below hasn't been tested yet... :P
 
 windows_l = list(windows.items())
+num_windows = len(windows_l)
 for i, a in enumerate(windows_l):
+    sys.stderr.write("Working on window %d of %d\n" % (i, num_windows))
     window_a = a[0]
     barcode_a = a[1]
     for b in windows_l[i+1:]:
         window_b = b[0]
         barcode_b = b[1]
-        sys.stdout.write(str(window_a) + "\t" + str(window_b) + "\t" + str(len((barcodes_a & barcodes_b)))+'\n')
+        sys.stdout.write(str(window_a) + "\t" + str(window_b) + "\t" + str(len((barcode_a & barcode_b)))+'\n')
