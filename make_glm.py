@@ -32,6 +32,8 @@ for line in sys.stdin:
 
 # Print a sparse matrix
 
+# The code below hasn't been tested yet... :P
+
 windows_l = list(windows.items())
 for i, a in enumerate(windows_l):
     window_a = a[0]
