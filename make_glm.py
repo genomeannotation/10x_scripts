@@ -16,6 +16,7 @@ WINDOW_SIZE = 10000
 
 windows = {} # a dictionary that maps window number to a list of barcodes
 
+sys.stderr.write("Reading input...\n")
 for line in sys.stdin:
     fields = line.strip().split()
     seq_id = fields[2]
@@ -31,9 +32,6 @@ for line in sys.stdin:
         windows[window_number] = set([barcode])
 
 # Print a sparse matrix
-
-# The code below hasn't been tested yet... :P
-
 windows_l = list(windows.items())
 num_windows = len(windows_l)
 for i, a in enumerate(windows_l):
