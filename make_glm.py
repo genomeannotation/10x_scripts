@@ -22,9 +22,9 @@ for line in sys.stdin:
     seq_id = fields[2]
     position = int(fields[3])
     for field in reversed(fields):
-        if field.startswith("RX"):
+        if field.startswith("BX"):
             barcode_field = field
-    barcode = barcode_field.split(":")[2]
+    barcode = barcode_field.split(":")[2].split("-")[0]
     window_number = int(position / WINDOW_SIZE + 1)
     if window_number in windows:
         windows[window_number].add(barcode)
