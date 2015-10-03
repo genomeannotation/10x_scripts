@@ -73,7 +73,7 @@ def main(args):
     sys.stderr.write("Writing output...\n")
 
     for cluster in clusters:
-        print(cluster)
+        print("\t".join([c for c in cluster]))
 
 
 ##################################################
