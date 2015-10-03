@@ -26,10 +26,10 @@ for line in sys.stdin:
             barcode_field = field
     barcode = barcode_field.split(":")[2].split("-")[0]
     window_number = int(position / WINDOW_SIZE + 1)
-    if window_number in windows:
-        windows[window_number].add(barcode)
+    if seq_id in windows:
+        windows[seq_id].add(barcode)
     else:
-        windows[window_number] = set([barcode])
+        windows[seq_id] = set([barcode])
 
 # Print a sparse matrix
 windows_l = list(windows.items())
@@ -41,4 +41,6 @@ for i, a in enumerate(windows_l):
     for b in windows_l[i+1:]:
         window_b = b[0]
         barcode_b = b[1]
-        sys.stdout.write(str(window_a) + "\t" + str(window_b) + "\t" + str(len((barcode_a & barcode_b)))+'\n')
+        barcodes_in_common = len((barcode_a & barcode_b))
+        if barcodes_in_common > 0:
+            sys.stdout.write(str(window_a) + "\t" + str(window_b) + "\t" + str(barcodes_in_common)+'\n')
