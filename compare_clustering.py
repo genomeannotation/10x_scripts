@@ -46,6 +46,9 @@ def main():
     clusters2 = read_cluster_file(clusterfile2)
     for i, cluster in enumerate(clusters1):
         most_similar = find_most_similar(cluster, clusters2)
+        if not most_similar:
+            # Not sure why this is happening ...
+            continue
         common_contigs = items_in_common(cluster, most_similar)
         print("Cluster %s:%d has %d/%d items in common with its most similar cluster"
                 % (clusterfile1, i, common_contigs, len(cluster)))
