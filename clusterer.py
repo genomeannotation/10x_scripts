@@ -1,40 +1,39 @@
 #!/usr/bin/env python
 
 import sys
+import argparse
 
 def main(args):
-    if len(args) < 2:
-        print("Usage: clusterer.py <num_clusters>")
-        exit()
-
-    desired_cluster_count = int(args[1])
+    #####################################
+    # Parse args
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--sparse-matrix', '-s', required=True)
+    parser.add_argument('--number-of-clusters', '-n', required=True, type=int)
+    parser.add_argument('--minimum-connection-strength', '-m')
+    args = parser.parse_args()
+    minimum_connection_strength = 0
+    if args.minimum_connection_strength:
+        minimum_connection_strength = int(args.minimum_connection_strength)
 
     #####################################
     # Input data
-
     sys.stderr.write("Reading input...\n")
-
     contig_sim = [] # Contig similarity [(contig_a, contig_b, num_barcodes_in_common)]
     contigs = set() # Set of all contigs
-    got_column_labels = False
 
-    for line in sys.stdin:
-        # Skip commented lines
-        if line.startswith("#"):
-            continue
-        if not got_column_labels:
-            got_column_labels = True
-            continue
-        contig_a, contig_b, barcodes_in_common = line.strip().split("\t")
-        contig_sim.append((contig_a, contig_b, int(barcodes_in_common)))
-        contigs.add(contig_a)
-        contigs.add(contig_b)
+    with open(args.sparse_matrix, 'r') as matrix_file:
+        for line in matrix_file:
+            # Skip commented lines
+            if line.startswith("#"):
+                continue
+            contig_a, contig_b, barcodes_in_common = line.strip().split("\t")
+            contig_sim.append((contig_a, contig_b, int(barcodes_in_common)))
+            contigs.add(contig_a)
+            contigs.add(contig_b)
     
     #####################################
     # Clustering
-
     sys.stderr.write("Clustering contigs...\n")
-
     clusters = []
     contig_clusters = {} # Maps each contig to its corresponding cluster
 
@@ -44,7 +43,7 @@ def main(args):
         contig_clusters[contig] = clusters[-1]
     
     # Cluster all the things
-    while len(clusters) > desired_cluster_count:
+    while len(clusters) > args.number_of_clusters:
         # Get next highest connection
         biggest = None
         for c in range(0, len(contig_sim)):
