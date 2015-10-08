@@ -24,9 +24,6 @@ def main(args):
         fields = line.strip().split()
         seq_id = fields[2]
         position = int(fields[3])
-        for field in reversed(fields):
-            if field.startswith("BX"):
-                barcode_field = field
         if seq_id in chromosomes and position <= end_pos:
             print(line)
 
