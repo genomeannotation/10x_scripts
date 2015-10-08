@@ -10,8 +10,26 @@
 #   samtools view foo.bam | python subset_sam.py --seqlist Chr1,Chr2,Chr3 --end 2000000
 # (outputs all reads in the bam file that are from the first 2Mbp of the first 3 chromosomes)
 
-def main():
-    pass
+import sys
+
+def main(args):
+    if len(args) < 2:
+        print("Usage: clusterer.py <end_position> <chromosome 1> <chromosome 2> ... <chromosome N>")
+        exit()
+
+    end_pos = int(args[1])
+    chromosomes = args[2:]
+
+    for line in sys.stdin:
+        fields = line.strip().split()
+        seq_id = fields[2]
+        position = int(fields[3])
+        for field in reversed(fields):
+            if field.startswith("BX"):
+                barcode_field = field
+        if seq_id in chromosomes and position <= end_pos:
+            print(line)
+
 
 
 #########################
