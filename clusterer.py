@@ -9,11 +9,11 @@ def main(args):
     parser = argparse.ArgumentParser()
     parser.add_argument('--sparse-matrix', '-s', required=True)
     parser.add_argument('--number-of-clusters', '-n', required=True, type=int)
-    parser.add_argument('--minimum-connection-strength', '-m')
+    parser.add_argument('--minimum-connection-strength', '-m', type=int)
     args = parser.parse_args()
     minimum_connection_strength = 0
     if args.minimum_connection_strength:
-        minimum_connection_strength = int(args.minimum_connection_strength)
+        minimum_connection_strength = args.minimum_connection_strength
 
     #####################################
     # Input data
@@ -49,8 +49,15 @@ def main(args):
         for c in range(0, len(contig_sim)):
             cluster_a = contig_clusters[contig_sim[c][0]]
             cluster_b = contig_clusters[contig_sim[c][1]]
+            connection_strength = contig_sim[c][2]
+            if connection_strength < minimum_connection_strength:
+                continue
             if (biggest == None or contig_sim[c][2] > contig_sim[biggest][2]) and cluster_a != cluster_b: 
                 biggest = c
+        if not biggest:
+            sys.stderr.write("No more connections greater than " +
+            "{0}; clustering complete.\n".format(minimum_connection_strength))
+            break
         contig_a = contig_sim[biggest][0]
         contig_b = contig_sim[biggest][1]
         contig_sim.pop(biggest)
