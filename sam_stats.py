@@ -16,7 +16,7 @@ def main():
     read_count = 0
     unique_barcodes = set()
     reads_per_seq = {} # map seq_id to total read count for that seq
-    barcodes_per_seq = OrderedDict() # map seq_id to a set of barcodes
+    barcodes_per_seq = OrderedDict() # map seq_id to a dict that maps barcode to count
     # Read sam file
     for line in sys.stdin:
         read_count += 1
@@ -32,12 +32,15 @@ def main():
         barcode = barcode_field.split(":")[2]
         unique_barcodes.add(barcode)
         if seq_id in barcodes_per_seq:
-            barcodes_per_seq[seq_id].add(barcode)
+            if barcode in barcodes_per_seq[seq_id]:
+                barcodes_per_seq[seq_id][barcode] += 1
+            else:
+                barcodes_per_seq[seq_id][barcode] = 1
         else:
-            barcodes_per_seq[seq_id] = set([barcode])
+            barcodes_per_seq[seq_id] = {barcode: 1}
     # Calculate and print results
     barcode_count = len(unique_barcodes)
-    barcode_counts_per_seq = [len(x) for x in barcodes_per_seq.values()]
+    barcode_counts_per_seq = [sum(x.values()) for x in barcodes_per_seq.values()]
     average_barcode_count_per_seq = \
             sum(barcode_counts_per_seq) / float(len(barcode_counts_per_seq))
     average_read_count_per_seq = \
@@ -47,8 +50,9 @@ def main():
     print("Avg barcodes per seq: {0}".format(average_barcode_count_per_seq))
     print("Avg reads per seq: {0}".format(average_read_count_per_seq))
     print("\nBarcodes per seq:")
-    for seq_id, barcode_set in barcodes_per_seq.items():
-        print("{0}\t{1}".format(seq_id, len(barcode_set)))
+    for seq_id, barcode_dict in barcodes_per_seq.items():
+        print("{0}\t{1}: {2}".format(seq_id, 
+            sum(barcode_dict.values()), sorted([x for x in barcode_dict.values()])))
 
 
 #########################
