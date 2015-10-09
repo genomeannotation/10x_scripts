@@ -1,20 +1,21 @@
 #!/usr/bin/env python
 
-# this script will read a sample sam file from stdin 
-# and calculate the "similarity" between
-# adjacent windows of the sequence, based on barcodes associated with loci.
-# it's meant to help with sketching out a reasonable "similarity" metric and 
-# to help characterize the data so we know what to expect.
-
-# toward this latter end, it'll also select random windows and calculate the
-# similarity between the chosen window and *all* other windows.
+# Read SAM file from stdin
+# Output sparse matrix to stdout:
+#    contig_1   contig_2    <connection_strength>
+# Where connection_strength = number of common barcodes
+# Optionally filter barcodes by read count
 
 import sys
-import random
+from collections import OrderedDict
 
-WINDOW_SIZE = 10000
+# Look for optional command line arg
+min_read_count = 0
+if len(sys.argv) > 1:
+    min_read_count = int(sys.argv[1])
 
-windows = {} # a dictionary that maps window number to a list of barcodes
+# Store contigs in a dict that maps contig id to a {barcode: read_count} dict
+contigs = OrderedDict()
 
 sys.stderr.write("Reading input...\n")
 for line in sys.stdin:
@@ -25,22 +26,35 @@ for line in sys.stdin:
         if field.startswith("BX"):
             barcode_field = field
     barcode = barcode_field.split(":")[2].split("-")[0]
-    window_number = int(position / WINDOW_SIZE + 1)
-    if seq_id in windows:
-        windows[seq_id].add(barcode)
+    if seq_id in contigs:
+        if barcode in contigs[seq_id]:
+            contigs[seq_id][barcode] += 1
+        else:
+            contigs[seq_id][barcode] = 1
     else:
-        windows[seq_id] = set([barcode])
+        # Add seq_id to the dictionary
+        contigs[seq_id] = {barcode: 1}
+
+# Filter results (optional)
+if min_read_count > 0:
+    sys.stderr.write("Filtering barcodes based on read count...\n")
+    for contig, barcode_dict in contigs.items():
+        # Decide which of this contig's barcodes to remove
+        barcodes_to_remove = []
+        for barcode, read_count in barcode_dict.items():
+            if read_count < min_read_count:
+                barcodes_to_remove.append(barcode)
+        # Now remove them
+        for barcode in barcodes_to_remove:
+            del barcode_dict[barcode]
 
 # Print a sparse matrix
-windows_l = list(windows.items())
-num_windows = len(windows_l)
-for i, a in enumerate(windows_l):
-    sys.stderr.write("Working on window %d of %d\n" % (i, num_windows))
-    window_a = a[0]
-    barcode_a = a[1]
-    for b in windows_l[i+1:]:
-        window_b = b[0]
-        barcode_b = b[1]
-        barcodes_in_common = len((barcode_a & barcode_b))
+sys.stderr.write("Writing sparse matrix...\n")
+all_contigs = contigs.keys()
+for i, contig in enumerate(all_contigs):
+    for other_contig in all_contigs[i+1:]:
+        barcodes_a = set(contigs[contig].keys())
+        barcodes_b = set(contigs[other_contig].keys())
+        barcodes_in_common = len((barcodes_a & barcodes_b))
         if barcodes_in_common > 0:
-            sys.stdout.write(str(window_a) + "\t" + str(window_b) + "\t" + str(barcodes_in_common)+'\n')
+            print("\t".join([contig, other_contig, str(barcodes_in_common)]))
