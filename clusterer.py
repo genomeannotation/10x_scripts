@@ -3,6 +3,8 @@
 import sys
 import argparse
 
+from cluster import Clusterer
+
 def main(args):
     #####################################
     # Parse args
@@ -19,6 +21,7 @@ def main(args):
     # Input data
     sys.stderr.write("Reading input...\n")
     contig_sim = [] # Contig similarity [(contig_a, contig_b, num_barcodes_in_common)]
+    contig_scores = {} # { contig_a : { contig_b : score } }
     contigs = set() # Set of all contigs
 
     with open(args.sparse_matrix, 'r') as matrix_file:
@@ -30,6 +33,26 @@ def main(args):
             contig_sim.append((contig_a, contig_b, int(barcodes_in_common)))
             contigs.add(contig_a)
             contigs.add(contig_b)
+            if contig_a not in contig_scores:
+                contig_scores[contig_a] = {}
+            if contig_b not in contig_scores:
+                contig_scores[contig_b] = {}
+            contig_scores[contig_b][contig_a] = int(barcodes_in_common)
+            contig_scores[contig_a][contig_b] = int(barcodes_in_common)
+
+    #####################################
+    # Clustering
+    #sys.stderr.write("Clustering contigs...\n")
+    #clusters = []
+
+    # Initialize every contig as being in its own cluster
+    #for contig in contigs:
+        #clusters.append([contig])
+
+    #clusterer = Clusterer(contig_scores, clusters)
+    #clusterer.run(3)
+
+    #exit()
     
     #####################################
     # Clustering
