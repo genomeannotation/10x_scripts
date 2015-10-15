@@ -27,11 +27,11 @@ def main():
             fields = line.strip().split()
             all_nodes.add_edge(fields[0], fields[1], weight=int(fields[2]))
 
-    for cluster in clusters:
+    for i, cluster in enumerate(clusters):
         # Create a graph
         g = networkx.Graph()
-        for i, node in enumerate(cluster):
-            for other_node in cluster[i+1:]:
+        for j, node in enumerate(cluster):
+            for other_node in cluster[j+1:]:
                 if other_node in all_nodes[node]:
                     g.add_edge(node, other_node, weight=all_nodes[node][other_node])
 
@@ -59,15 +59,17 @@ def main():
             if node1_edge_count <= 1 and node2_edge_count <= 1:
                 strongest_path.add_edge(node1, node2, weight=weight)
 
+        # Print path
         print(strongest_path.edges())
-        exit()
+        # Save graph
+        filename = "{0}.cluster_{1}.gexf".format(args.clusters, i)
+        networkx.write_gexf(strongest_path, filename)
 
-        # Print stuff
-        print("cluster {0}:".format(cluster))
-        for node in g.nodes():
-            print(node)
-            print(g[node])
-            print("****")
+        # Clean up (?)
+        del g
+        del strongest_path
+
+
 
 
 ##########################
