@@ -13,7 +13,7 @@ def get_seq_prefix(seq):
 def main():
     # Parse args
     parser = argparse.ArgumentParser()
-    parser.add_argument('--clusters', '-c', required=True)
+    parser.add_argument('clusters')
     args = parser.parse_args()
 
     # Read clusters file, store a list of lists of seqs
