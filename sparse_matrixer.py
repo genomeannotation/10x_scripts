@@ -67,7 +67,6 @@ def main():
     # Print a sparse matrix
     sys.stderr.write("Writing sparse matrix...\n")
     all_contigs = contigs.keys()
-    print(all_contigs)
     for i, contig in enumerate(all_contigs):
         for other_contig in all_contigs[i+1:]:
             barcodes_a = set(contigs[contig].keys())
