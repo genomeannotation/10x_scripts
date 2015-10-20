@@ -19,7 +19,7 @@ def main():
     args = parser.parse_args()
     min_read_count = 0
     if args.min_reads:
-        min_read_count = min_reads
+        min_read_count = args.min_reads
     head_barcodes = None
     if args.head_barcodes:
         head_barcodes = args.head_barcodes
