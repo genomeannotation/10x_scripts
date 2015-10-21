@@ -2,6 +2,7 @@
 
 import sys
 import argparse
+import heapq
 
 ####################################################################################################
 
@@ -105,29 +106,29 @@ def main(args):
     for contig in contigs:
         clusters.append(set([contig]))
         contig_clusters[contig] = clusters[-1]
-    
+
+    # Get the n-1 highest connections
+    # NOTE: len(contigs)*2 is a hack because we don't know exactly how many connections we'll need.
+    # This is because connections between contigs that are already in the same cluster have to be
+    # skipped.
+    highest = heapq.nlargest(len(contigs)*2, contig_sim, key=lambda x: x[2])
+        
     # Cluster all the things
     while len(clusters) > args.number_of_clusters:
         # Get next highest connection
-        biggest = None
-        for c in range(0, len(contig_sim)):
-            cluster_a = contig_clusters[contig_sim[c][0]]
-            cluster_b = contig_clusters[contig_sim[c][1]]
-            connection_strength = contig_sim[c][2]
-            if connection_strength < minimum_connection_strength:
-                continue
-            if (biggest == None or contig_sim[c][2] > contig_sim[biggest][2]) and cluster_a != cluster_b: 
-                biggest = c
+        biggest = highest.pop(0)
         if not biggest:
             sys.stderr.write("No more connections greater than " +
             "{0}; clustering complete.\n".format(minimum_connection_strength))
             break
-        contig_a = contig_sim[biggest][0]
-        contig_b = contig_sim[biggest][1]
-        contig_sim.pop(biggest)
+        contig_a = biggest[0]
+        contig_b = biggest[1]
 
         cluster_a = contig_clusters[contig_a]
         cluster_b = contig_clusters[contig_b]
+
+        if cluster_a == cluster_b:
+            continue
 
         # Create the new merged cluster
         new_cluster = cluster_a.union(cluster_b)
