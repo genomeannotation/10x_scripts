@@ -54,10 +54,15 @@ def main(args):
     parser.add_argument('--sparse-matrix', '-s', required=True)
     parser.add_argument('--number-of-clusters', '-n', required=True, type=int)
     parser.add_argument('--minimum-connection-strength', '-m', type=int)
+    parser.add_argument('--merge-progression', '-p', dest='merge_progression', action='store_true')
+    parser.set_defaults(merge_progression=False)
     args = parser.parse_args()
     minimum_connection_strength = 0
+    merge_progression = args.merge_progression
     if args.minimum_connection_strength:
         minimum_connection_strength = args.minimum_connection_strength
+
+    print(merge_progression)
 
     #####################################
     # Input data
@@ -72,7 +77,10 @@ def main(args):
             if line.startswith("#"):
                 continue
             contig_a, contig_b, barcodes_in_common = line.strip().split("\t")
-            contig_sim.append((contig_a, contig_b, int(barcodes_in_common)))
+            barcodes_in_common = int(barcodes_in_common)
+            if barcodes_in_common < minimum_connection_strength:
+                continue
+            contig_sim.append((contig_a, contig_b, barcodes_in_common))
             contigs.add(contig_a)
             contigs.add(contig_b)
             if contig_a not in contig_scores:
@@ -130,6 +138,9 @@ def main(args):
 
         if cluster_a == cluster_b:
             continue
+
+        if merge_progression:
+            sys.stderr.write("Merging clusters with connection strength: "+str(biggest[2])+"\n")
 
         # Create the new merged cluster
         new_cluster = cluster_a.union(cluster_b)
