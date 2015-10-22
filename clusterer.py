@@ -111,7 +111,7 @@ def main(args):
     # NOTE: len(contigs)*2 is a hack because we don't know exactly how many connections we'll need.
     # This is because connections between contigs that are already in the same cluster have to be
     # skipped.
-    highest = heapq.nlargest(len(contigs)*2, contig_sim, key=lambda x: x[2])
+    highest = heapq.nlargest(len(contig_sim), contig_sim, key=lambda x: x[2])
         
     # Cluster all the things
     while len(clusters) > args.number_of_clusters:
