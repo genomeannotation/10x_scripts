@@ -114,13 +114,14 @@ def main(args):
     highest = heapq.nlargest(len(contig_sim), contig_sim, key=lambda x: x[2])
         
     # Cluster all the things
+    c = 0
     while len(clusters) > args.number_of_clusters:
         # Get next highest connection
-        biggest = highest.pop(0)
-        if not biggest:
-            sys.stderr.write("No more connections greater than " +
-            "{0}; clustering complete.\n".format(minimum_connection_strength))
+        if c >= len(highest):
+            sys.stderr.write("No more connections, aborting\n")
             break
+        biggest = highest[c]
+        c += 1
         contig_a = biggest[0]
         contig_b = biggest[1]
 
