@@ -4,49 +4,6 @@ import sys
 import argparse
 import heapq
 
-####################################################################################################
-
-class Clusterer:
-    def __init__(self, contig_sim, clusters):
-        self.contig_sim = contig_sim
-        self.clusters = clusters
-
-    def run(self, desired_clusters):
-        while len(self.clusters) > desired_clusters:
-            # Find the highest scoring connection between clusters
-            highest_score = 0
-            best_pair = None
-            for i in range(0, len(self.clusters)):
-                for j in range(i+1, len(self.clusters)):
-                    score = self.compare(self.clusters[i], self.clusters[j])
-                    if score > highest_score:
-                        highest_score = score
-                        best_pair = (i, j)
-            # Break if we can't cluster anymore
-            if best_pair is None:
-                break
-            # Remove the clusters
-            i = best_pair[0]
-            j = best_pair[1]
-            cluster_a = self.clusters.pop(max(i, j))
-            cluster_b = self.clusters.pop(min(i, j))
-            # Merge the clusters
-            merged_cluster = cluster_a + cluster_b
-            # Add in the merged cluster
-            self.clusters.append(merged_cluster)
-        print("\n\n".join([str(c) for c in self.clusters]))
-
-    def compare(self, cluster_a, cluster_b):
-        score = 0
-        for a in cluster_a:
-            for b in cluster_b:
-                if a in self.contig_sim and b in self.contig_sim[a]:
-                    score += self.contig_sim[a][b]
-        score /= len(cluster_a)*len(cluster_b)
-        return score
-
-####################################################################################################
-
 def main(args):
     #####################################
     # Parse args
@@ -68,8 +25,8 @@ def main(args):
     # Input data
     sys.stderr.write("Reading input...\n")
     contig_sim = [] # Contig similarity [(contig_a, contig_b, num_barcodes_in_common)]
-    contig_scores = {} # { contig_a : { contig_b : score } }
     contigs = set() # Set of all contigs
+    edge_counts = {} # { contig : edge_count }
 
     with open(args.sparse_matrix, 'r') as matrix_file:
         for line in matrix_file:
@@ -78,32 +35,46 @@ def main(args):
                 continue
             contig_a, contig_b, barcodes_in_common = line.strip().split("\t")
             barcodes_in_common = int(barcodes_in_common)
+
+            if contig_a not in edge_counts:
+                edge_counts[contig_a] = 1
+            else:
+                edge_counts[contig_a] += 1
+            if contig_b not in edge_counts:
+                edge_counts[contig_b] = 1
+            else:
+                edge_counts[contig_b] += 1
+
             if barcodes_in_common < minimum_connection_strength:
                 continue
             contig_sim.append((contig_a, contig_b, barcodes_in_common))
             contigs.add(contig_a)
             contigs.add(contig_b)
-            if contig_a not in contig_scores:
-                contig_scores[contig_a] = {}
-            if contig_b not in contig_scores:
-                contig_scores[contig_b] = {}
-            contig_scores[contig_b][contig_a] = int(barcodes_in_common)
-            contig_scores[contig_a][contig_b] = int(barcodes_in_common)
 
     #####################################
-    # Clustering
-    #sys.stderr.write("Clustering contigs...\n")
-    #clusters = []
+    # Filtering
 
-    # Initialize every contig as being in its own cluster
-    #for contig in contigs:
-        #clusters.append([contig])
+    sys.stderr.write("Filtering...\n")
 
-    #clusterer = Clusterer(contig_scores, clusters)
-    #clusterer.run(3)
+    contigs_to_remove = []
+    avg_edge_count = sum(edge_counts.values())/len(edge_counts)
+    sys.stderr.write("avg edge count: {0}".format(avg_edge_count))
+    for contig, edge_count in edge_counts.items():
+        if edge_count > 1.5*avg_edge_count:
+            sys.stderr.write("Removing overly connected contig {0} with {1} edges\n".format(contig, edge_count))
+            contigs_to_remove.append(contig)
 
-    #exit()
-    
+    for contig in contigs_to_remove:
+        contigs.remove(contig)
+
+    filtered_contig_sim = []
+    for edge in contig_sim:
+        if edge[0] not in contigs_to_remove and edge[1] not in contigs_to_remove:
+            filtered_contig_sim.append(edge)
+
+    sys.stderr.write("Filtered {0}% of edges\n".format(len(filtered_contig_sim)/len(contig_sim)))
+    contig_sim = filtered_contig_sim
+
     #####################################
     # Clustering
     sys.stderr.write("Clustering contigs...\n")
@@ -141,6 +112,9 @@ def main(args):
 
         if merge_progression:
             sys.stderr.write("Merging clusters with connection strength: "+str(biggest[2])+"\n")
+
+        if contig_a[:5] != contig_b[:5]:
+            sys.stderr.write("Incorectly joining chromosomes {0}: {1} and {2}\n".format(str(c), contig_a, contig_b))
 
         # Create the new merged cluster
         new_cluster = cluster_a.union(cluster_b)
