@@ -72,7 +72,8 @@ def main(args):
         if edge[0] not in contigs_to_remove and edge[1] not in contigs_to_remove:
             filtered_contig_sim.append(edge)
 
-    sys.stderr.write("Filtered {0}% of edges\n".format(len(filtered_contig_sim)/len(contig_sim)))
+    percent_removed = float(len(filtered_contig_sim))*100.0/float(len(contig_sim))
+    sys.stderr.write("Filtered {0}% of contigs\n".format(percent_removed))
     contig_sim = filtered_contig_sim
 
     #####################################
