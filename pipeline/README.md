@@ -8,17 +8,21 @@
 
 ## Example command line
 
+Create a sparse matrix file, only creating connections where each contig in question has 20 or more reads from a given barcode, and where the common barcode is among the 40 most read-abundant on each contig
 ```
-# Create a sparse matrix file, only creating connections where each contig
-# in question has 20 or more reads from a given barcode, and where the
-# common barcode is among the 40 most read-abundant on each contig
 samtoools view test.bam | python sparse_matrixer.py --min-reads 20 --head-barcodes 40 >\
 test.sparse_matrix
-# Now cluster the contigs. Ignore connections between contigs if they have
-# fewer than 10 barcodes in common
+```
+Now cluster the contigs. Ignore connections between contigs if they have fewer than 10 barcodes in common
+```
 python clusterer.py --sparse-matrix test.sparse_matrix --minimum-connection-strength 10 >\
 test.clusters
-# Order the clusters
+```
+Order the clusters
+```
 python orderer.py --sparse-matrix test.sparse_matrix --clusters test.clusters > test.order
-# Now orient the ordered contigs
+```
+Now orient the ordered contigs
+```
 python mirrorer.py # TODO OMG WUT
+```
