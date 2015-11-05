@@ -72,8 +72,8 @@ def main(args):
         if edge[0] not in contigs_to_remove and edge[1] not in contigs_to_remove:
             filtered_contig_sim.append(edge)
 
-    percent_removed = float(len(filtered_contig_sim))*100.0/float(len(contig_sim))
-    sys.stderr.write("Filtered {0}% of contigs\n".format(percent_removed))
+    percent_left = float(len(filtered_contig_sim))*100.0/float(len(contig_sim))
+    sys.stderr.write("Filtered {0}% of contigs\n".format(100.0-percent_left))
     contig_sim = filtered_contig_sim
 
     #####################################
@@ -95,6 +95,7 @@ def main(args):
         
     # Cluster all the things
     c = 0
+    used = {contig : 0 for contig in contigs}
     while len(clusters) > args.number_of_clusters:
         # Get next highest connection
         if c >= len(highest):
@@ -108,8 +109,11 @@ def main(args):
         cluster_a = contig_clusters[contig_a]
         cluster_b = contig_clusters[contig_b]
 
-        if cluster_a == cluster_b:
+        if cluster_a == cluster_b or used[contig_a] > 2 or used[contig_b] > 2:
             continue
+
+        used[contig_a] += 1
+        used[contig_b] += 1
 
         if merge_progression:
             sys.stderr.write("Merging clusters with connection strength: "+str(biggest[2])+"\n")
