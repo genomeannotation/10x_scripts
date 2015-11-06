@@ -15,11 +15,15 @@ def main():
     # Parse args
     parser = argparse.ArgumentParser()
     parser.add_argument('--min-reads', '-m', type=int)
+    parser.add_argument('--max-reads', '-M', type=int)
     parser.add_argument('--head-barcodes', '-b', type=int)
     args = parser.parse_args()
     min_read_count = 0
     if args.min_reads:
         min_read_count = args.min_reads
+    max_read_count = None
+    if args.max_reads:
+        max_read_count = args.max_reads
     head_barcodes = None
     if args.head_barcodes:
         head_barcodes = args.head_barcodes
@@ -47,12 +51,23 @@ def main():
 
     # Filter results (optional)
     if min_read_count > 0:
-        sys.stderr.write("Filtering barcodes based on read count...\n")
+        sys.stderr.write("Filtering barcodes based on min read count...\n")
         for contig, barcode_dict in contigs.items():
             # Decide which of this contig's barcodes to remove
             barcodes_to_remove = []
             for barcode, read_count in barcode_dict.items():
                 if read_count < min_read_count:
+                    barcodes_to_remove.append(barcode)
+            # Now remove them
+            for barcode in barcodes_to_remove:
+                del barcode_dict[barcode]
+    if max_read_count != None:
+        sys.stderr.write("Filtering barcodes based on max read count...\n")
+        for contig, barcode_dict in contigs.items():
+            # Decide which of this contig's barcodes to remove
+            barcodes_to_remove = []
+            for barcode, read_count in barcode_dict.items():
+                if read_count > max_read_count:
                     barcodes_to_remove.append(barcode)
             # Now remove them
             for barcode in barcodes_to_remove:
