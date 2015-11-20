@@ -24,6 +24,8 @@ def main():
     sys.stderr.write("Reading input...\n")
     for line in sys.stdin:
         fields = line.strip().split()
+        if len(fields) == 0:
+            continue
         position = int(fields[3])
         for field in reversed(fields):
             if field.startswith("BX"):
@@ -36,7 +38,7 @@ def main():
             windows[window] = set([barcode])
 
     for w, barcodes in windows.items():
-        print(format("{0}:\t{1}", w, '\t'.join(list(barcodes))))
+        print(str(w) + ':\t' + '\t'.join(list(barcodes)))
 
 ####################################################################################################
 
