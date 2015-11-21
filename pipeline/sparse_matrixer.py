@@ -34,6 +34,8 @@ def main():
     sys.stderr.write("Reading input...\n")
     for line in sys.stdin:
         fields = line.strip().split()
+        if len(fields) == 0:
+            continue
         seq_id = fields[2]
         position = int(fields[3])
         for field in reversed(fields):
@@ -72,7 +74,7 @@ def main():
             # Now remove them
             for barcode in barcodes_to_remove:
                 del barcode_dict[barcode]
-    if head_barcodes > 0:
+    if head_barcodes != None:
         sys.stderr.write("Filtering: Keeping top %d barcodes on each contig\n" % head_barcodes)
         for contig, barcode_dict in contigs.items():
             barcodes = list(barcode_dict.items())
@@ -81,7 +83,7 @@ def main():
 
     # Print a sparse matrix
     sys.stderr.write("Writing sparse matrix...\n")
-    all_contigs = contigs.keys()
+    all_contigs = list(contigs.keys())
     for i, contig in enumerate(all_contigs):
         for other_contig in all_contigs[i+1:]:
             barcodes_a = set(contigs[contig].keys())
