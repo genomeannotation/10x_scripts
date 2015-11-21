@@ -109,7 +109,7 @@ def main(args):
         cluster_a = contig_clusters[contig_a]
         cluster_b = contig_clusters[contig_b]
 
-        if cluster_a == cluster_b or used[contig_a] > 2 or used[contig_b] > 2:
+        if cluster_a == cluster_b or used[contig_a] > 1 or used[contig_b] > 1:
             continue
 
         used[contig_a] += 1
