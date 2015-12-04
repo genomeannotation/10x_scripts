@@ -26,6 +26,7 @@ def findAverage(l):
 def pastLowerBound(l, minRead):
     lowerBound = False
     newList = []
+    i = 0
     i = len(l) - 1
     while lowerBound == False:
         for x in range(0, 10):
@@ -41,7 +42,7 @@ def pastLowerBound(l, minRead):
             newList = l
             break
     return newList[i]
-    
+
 # finds a window of 10 values in which the avg is below the 
 # specified minReadCount, take a list and minRead value as arg 
 # returns a list and bool 
@@ -75,11 +76,11 @@ def Main():
 
         #argparse decalrations
         parser = argparse.ArgumentParser()
-        parser.add_argument("minReadCount", help="The lower " + \
+        parser.add_argument('--minReadCount', '-l',help="The lower " + \
                             "threshold for reads", type=int)
-        parser.add_argument("maxReadCount", help="The upper  " + \
+        parser.add_argument('--maxReadCount', '-u', help="The upper  " + \
                             "threshold for reads", type=int)
-        parser.add_argument("readCountFile", help="Name of the " + \
+        parser.add_argument('--readCountFile', '-f', help="Name of the " + \
                             "input file", type=str)
         args = parser.parse_args()
 
@@ -88,24 +89,32 @@ def Main():
             #reads in input file
             with open(args.readCountFile) as input:
                 count = 0
+
+                #strips and split input line and stores into list 
                 for line in input:
                     fields = line.strip().split()
                     reads.append(fields)
                     count = count + 1
+
                     #read above max threshold has been found, 
                     if int(fields[3]) >= args.maxReadCount \
                             and pastLowerFound == False:
                         #check for lower bound the has been read in    
                         arr = pastLowerBound(reads, args.minReadCount)
+                        if len >= 10:
+                            mid = 5
+                        else:
+                            mid = 0
                         pastLowerFound = True
                         count = 0
-                        outFile.write("%s\t%s" %(arr[0], (int(arr[1]))))
+                        outFile.write("%s\t%s" %(arr[0], (int(arr[1]) + mid)))
                     #past lower bound has been found    
                     elif pastLowerFound == True and count == 10:
                         #check new values read in for lower bound
                         arr, futureLowerFound = futureLowerBound(reads, args.minReadCount)
                         if futureLowerFound == True:
-                            outFile.write("\t%d\tmask\n" %(int(arr[1])))
+                            outFile.write("\t%d\tmask\n" %(int(arr[1]) + 5))
+                            count = 0
                         else:
                             break
                     #both past and future lowerbounds have been found reset bools and list        
@@ -113,7 +122,14 @@ def Main():
                         reads = []
                         pastLowerFound = False
                         futureLowerFound = False
+                if pastLowerFound == True and futureLowerFound == False:
+                    arr, futureLowerFound = futureLowerBound(reads, args.minReadCount)
+                    mid = len(reads)/2
+                    outFile.write("\t%d\tmask\n" %(int(arr[1]) + mid))
+
+            #input file closed
             input.close()
+        #output file closed
         outFile.close()
 
 ###############################################################################
