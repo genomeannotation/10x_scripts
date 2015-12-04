@@ -1,7 +1,7 @@
 This is a naive version of the mask, will currently find range where counts are
-above a specified threshold.
+above a specified threshold. Will output to maskOutout.bed. Use flags -l for lower bound -u for upperbound -f for file
 
-	python mask_bam.py 20 sample.read_counts.tsv 
+	python mask_bam.py -l 10 -u 20 -f sample.read_counts.tsv 
 	
 
 If you run something like
