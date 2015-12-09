@@ -81,11 +81,11 @@ def Main():
         #argparse decalrations
         parser = argparse.ArgumentParser()
         parser.add_argument('--minReadCount', '-l',help="The lower " + \
-                            "threshold for reads", type=int)
+                            "threshold for reads", type=int, required = True)
         parser.add_argument('--maxReadCount', '-u', help="The upper  " + \
-                            "threshold for reads", type=int)
+                            "threshold for reads", type=int, required  = True)
         parser.add_argument('--readCountFile', '-f', help="Name of the " + \
-                            "input file", type=str)
+                            "input file", type=str, required = True)
         args = parser.parse_args()
 
         #opens output file maskOutput.bed
@@ -100,6 +100,7 @@ def Main():
                     reads.append(fields)
                     count = count + 1
 
+                    print fields[3]
                     #read above max threshold has been found, 
                     if int(fields[3]) >= args.maxReadCount \
                             and pastLowerFound == False:
