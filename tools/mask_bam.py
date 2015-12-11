@@ -97,6 +97,8 @@ def Main():
                 #strips and split input line and stores into list 
                 for line in input:
                     fields = line.strip().split()
+                    if len(fields) < 4:
+                        continue
                     reads.append(fields)
                     count = count + 1
 
