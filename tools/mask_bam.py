@@ -102,7 +102,7 @@ def Main():
                     reads.append(fields)
                     count = count + 1
 
-                    print fields[3]
+                    #print fields[3]
                     #read above max threshold has been found, 
                     if int(fields[3]) >= args.maxReadCount \
                             and pastLowerFound == False:
