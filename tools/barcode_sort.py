@@ -5,6 +5,86 @@ import sys
 
 from operator import itemgetter
 
+class HashTable:
+    #mod hash value
+    moduloValue = 10
+    
+    def __init__(self):
+        self.keys = [None]
+        self.data = [None]
+
+    def insertValue(self, key, data):
+        
+        #mod hash value
+        #int moduloValue = 10 
+
+        #generate a new hash value, 
+        hashValue = self.hashFunction(key, moduloValue)
+
+        if self.keys[hashValue] == None:
+            self.keys[hashValue] = key
+            self.data[hashValue] = data
+        else:
+            if self.keys[hashValue] == key:
+                # key is found, replace current data with new data
+                self.data[hashValue] = data
+            else:
+                #collision occured, rehash a new value
+                nextKey = self.rehash(hashValue, moduloValue)
+                while self.keys[nextKey] != None and \
+                        self.keys[nextKey] != key:
+                    nextKey = self.rehash(nextKey, moduloValue)
+                #if no key is present set key and data
+                if self.keys[nextKey] == None:
+                    self.keys[nextKey] = key
+                    self.data[nextkey] = data
+                else:
+                    #key is found, replace existing data with new data
+                    self.data[nextKey] = data
+    
+    #Generate a hash value key modulo moduloValue
+    def hashFunction(self, key, modValue):
+        return key%modValue
+    
+    #Generate a new hash value (old value + 1) % moduloValue
+    def rehash(self, hashValue, modValue):
+        return (hashvalue + 1)%modValue
+    
+    #Calls hashfunction to find key, if collison occured and key placed 
+    #in a rehashed position will call rehash function. Stops when key is found or if
+    #returns to initial position.
+    def findValue(self, key):
+        #find initial hash value
+        intialPosition = self.hashFunction(key, moduloValue)
+        
+        data = None
+        found = False
+        stop = False
+        
+        position = initialPosition
+
+        while self.keys[position] != None and not found and \
+                not stop:
+            #Key is in initial position, data is returned
+            if self.keys[position] == key:
+                found = True
+                data = self.data[position]
+            #Key is not in initial position, rehash is called
+            else:
+                position = self.rehash(position, moduloValue)
+                #Key has not been found, the rehashed position
+                #has returned to the initial position
+                if position == initialPosition:
+                    stop = True
+        return data
+    #Overload the getitem method
+    #def __getitem__(self, key):
+    #    return self.findValue(key)
+    
+    #overload the setitem method
+    #def __setitem_(self, key, data):
+    #    self.insertValue(key, data)
+
 #write list to std out
 def printOut(l):
     for i in range(len(l)):
@@ -20,7 +100,7 @@ def main():
     count = 1
     #argparse declarations
     parser = argparse.ArgumentParser()
-    parser.add_argument('--inputFile', '--f', help = "Enter the" + \
+    parser.add_argument('--inputFile', '-f', help = "Enter the" + \
                         " of the input file.", type=str, required = True)
 
     args=parser.parse_args()
@@ -29,15 +109,15 @@ def main():
         for line in input:
             
             fields = line.strip().split('\t')
-            if len(fields) > 0:
+            if len(fields) > 1:
                 for i in range (len(fields)):
                     if fields[i].startswith('BX:'):
-                        fields.insert(0, fields.pop(i)) 
-            barcodes.append(fields)
+                        fields.insert(0, removeBX(fields.pop(i))) 
+                barcodes.append(fields)
                 #printOut(fields)
         
         #printOut(barcodes)
-        temp = sorted(barcodes, key=itemgetter(0))
+        temp = sorted(barcodes, key=itemgetter(0, 1))
         printOut(temp)
 
 ###############################################################################
