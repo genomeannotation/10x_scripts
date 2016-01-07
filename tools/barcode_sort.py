@@ -7,7 +7,7 @@ from operator import itemgetter
 
 class HashTable:
     #mod hash value
-    moduloValue = 10
+    #modValue = 10
     
     def __init__(self):
         self.keys = [None]
@@ -16,10 +16,10 @@ class HashTable:
     def insertValue(self, key, data):
         
         #mod hash value
-        #int moduloValue = 10 
+        modValue = 10 
 
         #generate a new hash value, 
-        hashValue = self.hashFunction(key, moduloValue)
+        hashValue = self.hashFunction(key, modValue)
 
         if self.keys[hashValue] == None:
             self.keys[hashValue] = key
@@ -30,10 +30,10 @@ class HashTable:
                 self.data[hashValue] = data
             else:
                 #collision occured, rehash a new value
-                nextKey = self.rehash(hashValue, moduloValue)
+                nextKey = self.rehash(hashValue, modValue)
                 while self.keys[nextKey] != None and \
                         self.keys[nextKey] != key:
-                    nextKey = self.rehash(nextKey, moduloValue)
+                    nextKey = self.rehash(nextKey, modValue)
                 #if no key is present set key and data
                 if self.keys[nextKey] == None:
                     self.keys[nextKey] = key
@@ -42,7 +42,7 @@ class HashTable:
                     #key is found, replace existing data with new data
                     self.data[nextKey] = data
     
-    #Generate a hash value key modulo moduloValue
+    #Generate a hash value key modulo modValue
     def hashFunction(self, key, modValue):
         return key%modValue
     
@@ -51,11 +51,12 @@ class HashTable:
         return (hashvalue + 1)%modValue
     
     #Calls hashfunction to find key, if collison occured and key placed 
-    #in a rehashed position will call rehash function. Stops when key is found or if
-    #returns to initial position.
+    #in a rehashed position will call rehash function. Stops when key is found
+    #or if returns to initial position.
     def findValue(self, key):
+        modValue = 10
         #find initial hash value
-        intialPosition = self.hashFunction(key, moduloValue)
+        intialPosition = self.hashFunction(key, modValue)
         
         data = None
         found = False
@@ -88,7 +89,14 @@ class HashTable:
 #write list to std out
 def printOut(l):
     for i in range(len(l)):
-        sys.stdout.write(str(l[i]) + '\n' + '\n')
+        #to stdout as a list
+        #sys.stdout.write(str(l[i]) + '\n' + '\n')
+        
+        temp = l[i]
+        #pops BX barcode, sets as header
+        print('@HD ' + temp.pop(0))
+        #prints list contents delimited with a tab
+        print('\t'.join(temp) + '\n')
 
 def removeBX(s):
     return s[5:]
@@ -101,7 +109,7 @@ def main():
     #argparse declarations
     parser = argparse.ArgumentParser()
     parser.add_argument('--inputFile', '-f', help = "Enter the" + \
-                        " of the input file.", type=str, required = True)
+                        " of the input file.", type = str, required = True)
 
     args=parser.parse_args()
 
@@ -112,12 +120,12 @@ def main():
             if len(fields) > 1:
                 for i in range (len(fields)):
                     if fields[i].startswith('BX:'):
-                        fields.insert(0, removeBX(fields.pop(i))) 
+                        fields.insert(0, str(removeBX(fields.pop(i)))) 
                 barcodes.append(fields)
                 #printOut(fields)
         
         #printOut(barcodes)
-        temp = sorted(barcodes, key=itemgetter(0, 1))
+        temp = sorted(barcodes, key = itemgetter(0, 1))
         printOut(temp)
 
 ###############################################################################
