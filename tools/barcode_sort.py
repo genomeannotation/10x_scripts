@@ -5,6 +5,9 @@ import sys
 
 from operator import itemgetter
 
+#keep track of file
+#dict fileList[]
+
 class HashTable:
     #mod hash value
     #modValue = 10
@@ -86,6 +89,19 @@ class HashTable:
     #def __setitem_(self, key, data):
     #    self.insertValue(key, data)
 
+#Prints barcodes to file
+def tofile(l):
+    
+    #Writes reads with same BX: to file
+    #ToDo: add hashtable to keep track of files if current code is to slow
+    for i in range (len(l)):
+        k = l[i];  
+        with open('%s.txt' % k[0], 'a') as myFile:              
+            temp = l[i]
+            myFile.write('@HD' + temp.pop(0) + '\n')
+            myFile.write('\t'.join(temp) + '\n')
+        myFile.close()
+
 #write list to std out
 def printOut(l):
     for i in range(len(l)):
@@ -98,6 +114,7 @@ def printOut(l):
         #prints list contents delimited with a tab
         print('\t'.join(temp) + '\n')
 
+# Removes the BX: from barcode
 def removeBX(s):
     return s[5:]
 
@@ -126,8 +143,8 @@ def main():
         
         #printOut(barcodes)
         temp = sorted(barcodes, key = itemgetter(0, 1))
-        printOut(temp)
-
+        #printOut(temp)
+        tofile(temp);
 ###############################################################################
 if __name__ == '__main__':
     main()
