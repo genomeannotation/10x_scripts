@@ -25,7 +25,7 @@ def writeToFile(b, f):
     for i in range(len(f)):
         temp = f[i]
         with open(filename, 'a') as myfile:
-            myfile.write('/t'.join(temp) + '\n')
+            myfile.write(' '.join(temp) + '\n')
         myfile.close()
 
 #removes first 3 and last 2 chars from file name
