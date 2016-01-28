@@ -1,6 +1,6 @@
 #! /usr/bin/env/ python2.7
 #program parses a fastq file and separates into smaller fastq files by barcode
-#run with python fastqParser.py -p potentialReads -f fastqFile
+#run with python fastqParser.py -p readgroups.tsv -f file.fastq
 #output stores files in ~/fastqFiles/
 
 import argparse
@@ -8,6 +8,9 @@ import sys
 import os
 from collections import defaultdict
 
+
+#Class to create Trie tree
+#Currently not used
 class Trie:
     def __init__(self):
         self.root = defaultdict()
@@ -36,27 +39,31 @@ class Trie:
             current = current[letter]
         return True
 
-
-
 #function creates directory if none exists, makes a file w/name passed in,  
 #if file already exists then does nothing
 def makefile(l):
-    filename = '~/fastqFiles/%s.fastq' % l 
-    if not os.path.exists('~/fastqFiles/'):
-        os.makedirs('~/fastqFiles/', 0777)
+    first3 = l[:4]
+    second3 = l[4:8]
+    third4 = l[8:11]
+    filename = '~/'+first3+'/'+second3+'/'+third4+'/%s.fastq' % l 
+    if not os.path.exists('~/'+first3+'/'+second3+'/'+third4+'/'):
+        os.makedirs('~/'+first3+'/'+second3+'/'+third4+'/', 0777)
     with open(filename, 'a') as myfile:
         myfile.close()
 
 #function writes to fasta file, creates file if does not exist, appends
 #to file if it does exist
 def writeToFile(b, f):
-    filename = '~/fastqFiles/%s.fastq' % b
-    if not os.path.exists('~/fastqFiles/'):
-        os.makedirs('~/fastqFiles/', 0777)
+    first3 = b[:4]
+    second3 = b[4:8]
+    third4 = b[8:11]
+    filename = '~/'+first3+'/'+second3+'/'+third4+'/%s.fastq' % b
+    if not os.path.exists('~/'+first3+'/'+second3+'/'+third4+'/'):
+        os.makedirs('~/'+first3+'/'+second3+'/'+third4+'/', 0777)
     for i in range(len(f)):
         temp = f[i]
         with open(filename, 'a') as myfile:
-            myfile.write(' '.join(temp) + '\n' + '\n')
+            myfile.write(' '.join(temp) + '\n')
         myfile.close()
 
 #removes first 3 and last 2 chars from file name
@@ -72,17 +79,7 @@ def main():
     temp = []
     foundSequence = False
     count = 0
-
-    #test = Trie()
-    #test.insert('helloworld')
-    #test.insert('ilikeapple')
-    #test.insert('helloz')
-
-    #print test.search('hello')
-    #print test.startsWith('hello')
-    #print test.search('ilikeapple')
-
-
+    
     #arg parse stuff
     parser = argparse.ArgumentParser()
     parser.add_argument('-potentialBarcodes', '-p', help = "Enter the" + \
@@ -115,7 +112,7 @@ def main():
                     if len(fields) > 1 and fields[1].startswith('BX:'): 
                         barcode = str(cleanBarcode(fields[1]))
                     else:
-                        barcode = 'discard'
+                        barcode = '~discard'
                 
                 if len(fields) > 0 and foundSequence == True:
                     temp.append(fields)
