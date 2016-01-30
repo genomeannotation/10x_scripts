@@ -1,6 +1,6 @@
 #! /usr/bin/env/ python2.7
 #program parses a fastq file and separates into smaller fastq files by barcode
-#run with python fastqParser.py -p readgroups.tsv -f file.fastq
+#run with python fastqParser.py -r readgroups.tsv -f file.fastq
 #output stores files in ~/fastqFiles/
 
 import argparse
@@ -42,24 +42,37 @@ class Trie:
 #function creates directory if none exists, makes a file w/name passed in,  
 #if file already exists then does nothing
 def makefile(l):
-    first3 = l[:4]
-    second3 = l[4:8]
-    third4 = l[8:11]
-    filename = '~/'+first3+'/'+second3+'/'+third4+'/%s.fastq' % l 
-    if not os.path.exists('~/'+first3+'/'+second3+'/'+third4+'/'):
-        os.makedirs('~/'+first3+'/'+second3+'/'+third4+'/', 0777)
-    with open(filename, 'a') as myfile:
-        myfile.close()
-
+    first = l[:1]
+    second = l[1:3]
+    third = l[3:7]
+    fourth = l[7:11]
+    filename1 = '~/'+first+'/'+second+'/'+third+'/'+fourth+'/%s_r1.fastq' % l 
+    filename2 = '~/'+first+'/'+second+'/'+third+'/'+fourth+'/%s_r2.fastq' % l 
+    
+    #create directory if it does not exist
+    if not os.path.exists('~/'+first+'/'+second+'/'+third+'/'+fourth+'/'):
+        os.makedirs('~/'+first+'/'+second+'/'+third+'/'+fourth+'/', 0777)
+    
+    #open and read file for read 1
+    with open(filename1, 'a') as myfile1:
+        myfile1.close()
+    
+    #open/create file for read 2
+    with open(filename2, 'a') as myfile2:
+        myfile2.close()
+        
 #function writes to fasta file, creates file if does not exist, appends
 #to file if it does exist
 def writeToFile(b, f):
-    first3 = b[:4]
-    second3 = b[4:8]
-    third4 = b[8:11]
-    filename = '~/'+first3+'/'+second3+'/'+third4+'/%s.fastq' % b
-    if not os.path.exists('~/'+first3+'/'+second3+'/'+third4+'/'):
-        os.makedirs('~/'+first3+'/'+second3+'/'+third4+'/', 0777)
+    first = b[:1]
+    second = b[1:3]
+    third = b[3:7]
+    fourth = b[7:11]
+    filename = '~/'+first+'/'+second+'/'+third+'/'+fourth+'/%s.fastq' % b
+    
+    #create directory if it does not exist
+    if not os.path.exists('~/'+first+'/'+second+'/'+third+'/'+fourth+'/'):
+        os.makedirs('~/'+first+'/'+second+'/'+third+'/'+fourth+'/', 0777)
     for i in range(len(f)):
         temp = f[i]
         with open(filename, 'a') as myfile:
@@ -77,12 +90,13 @@ def cleanBarcode(b):
 def main():
     fields = []
     temp = []
+    previous =[" "]
     foundSequence = False
     count = 0
     
     #arg parse stuff
     parser = argparse.ArgumentParser()
-    parser.add_argument('-potentialBarcodes', '-p', help = "Enter the" + \
+    parser.add_argument('-potentialBarcodes', '-r', help = "Enter the" + \
                         " name of file.", type = str, required = False)
     parser.add_argument('-fastqInput', '-f', help = "Enter the" + \
                         " name of fastq file", type = str, required = False)
@@ -102,18 +116,25 @@ def main():
         with open(args.fastqInput, 'r') as fqin:
             for line in fqin:
                 fields = line.strip().split()
-                
-                #checks for start  sequence
+                #checks for start  sequenceV
                 if len(fields) > 0 and fields[0].startswith('@'):
                     foundSequence = True
-                    
-                    #checks for barcode, if exists barcode will be used as
-                    #filename, esle filename set to discard
-                    if len(fields) > 1 and fields[1].startswith('BX:'): 
-                        barcode = str(cleanBarcode(fields[1]))
+                    if(fields[0] == previous):    
+                        #checks for barcode, if exists barcode will be used as
+                        #filename, esle filename set to discard
+                        if len(fields) > 1 and fields[1].startswith('BX:'): 
+                            barcode = str(cleanBarcode(fields[1])+'_r2')
+                            previous =" "
+                        else:
+                            barcode = '~discard'
                     else:
-                        barcode = '~discard'
-                
+                        #checks for barcode, if exists barcode will be used as
+                        #filename, esle filename set to discard
+                        if len(fields) > 1 and fields[1].startswith('BX:'): 
+                            barcode = str(cleanBarcode(fields[1])+'_r1')
+                            previous = fields[0]
+                        else:
+                            barcode = '~discard'
                 if len(fields) > 0 and foundSequence == True:
                     temp.append(fields)
                 
