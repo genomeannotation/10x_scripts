@@ -6,6 +6,7 @@
 import argparse
 import sys
 import os
+import gzip
 from collections import defaultdict
 
 
@@ -46,21 +47,21 @@ def makefile(l):
     second = l[1:3]
     third = l[3:7]
     fourth = l[7:11]
-    filename1 = '~/'+first+'/'+second+'/'+third+'/'+fourth+'/%s_r1.fastq' % l 
-    filename2 = '~/'+first+'/'+second+'/'+third+'/'+fourth+'/%s_r2.fastq' % l 
-    
+    filename1 = 'barcodes/'+first+'/'+second+'/'+third+'/'+fourth+'/%s_r1.fastq' % l
+    filename2 = 'barcodes/'+first+'/'+second+'/'+third+'/'+fourth+'/%s_r2.fastq' % l
+
     #create directory if it does not exist
-    if not os.path.exists('~/'+first+'/'+second+'/'+third+'/'+fourth+'/'):
-        os.makedirs('~/'+first+'/'+second+'/'+third+'/'+fourth+'/', 0777)
-    
+    if not os.path.exists('barcodes/'+first+'/'+second+'/'+third+'/'+fourth+'/'):
+        os.makedirs('barcodes/'+first+'/'+second+'/'+third+'/'+fourth+'/', 0777)
+
     #open and read file for read 1
     with open(filename1, 'a') as myfile1:
         myfile1.close()
-    
+
     #open/create file for read 2
     with open(filename2, 'a') as myfile2:
         myfile2.close()
-        
+
 #function writes to fasta file, creates file if does not exist, appends
 #to file if it does exist
 def writeToFile(b, f):
@@ -68,11 +69,11 @@ def writeToFile(b, f):
     second = b[1:3]
     third = b[3:7]
     fourth = b[7:11]
-    filename = '~/'+first+'/'+second+'/'+third+'/'+fourth+'/%s.fastq' % b
-    
+    filename = 'barcodes/'+first+'/'+second+'/'+third+'/'+fourth+'/%s.fastq' % b
+
     #create directory if it does not exist
-    if not os.path.exists('~/'+first+'/'+second+'/'+third+'/'+fourth+'/'):
-        os.makedirs('~/'+first+'/'+second+'/'+third+'/'+fourth+'/', 0777)
+    if not os.path.exists('barcodes/'+first+'/'+second+'/'+third+'/'+fourth+'/'):
+        os.makedirs('barcodes/'+first+'/'+second+'/'+third+'/'+fourth+'/', 0777)
     for i in range(len(f)):
         temp = f[i]
         with open(filename, 'a') as myfile:
@@ -93,7 +94,7 @@ def main():
     previous =[" "]
     foundSequence = False
     count = 0
-    
+
     #arg parse stuff
     parser = argparse.ArgumentParser()
     parser.add_argument('-potentialBarcodes', '-r', help = "Enter the" + \
@@ -101,28 +102,28 @@ def main():
     parser.add_argument('-fastqInput', '-f', help = "Enter the" + \
                         " name of fastq file", type = str, required = False)
     args=parser.parse_args()
-   
+
     #exe if potential barcode file is passed as arg
     if args.potentialBarcodes:
         #while file is open strips and cleans barcode for filename
         with open(args.potentialBarcodes, 'r') as input:
             for line in input:
                 fields = line.strip().split('\t')
-                makefile(str(cleanFileName(fields[1])))                        
+                makefile(str(cleanFileName(fields[1])))
                 fields[:]=[]
 
     #exe if a fastq file is passed as arg
     if args.fastqInput:
-        with open(args.fastqInput, 'r') as fqin:
+        with gzip.open(args.fastqInput, 'rb') as fqin:
             for line in fqin:
                 fields = line.strip().split()
                 #checks for start  sequenceV
                 if len(fields) > 0 and fields[0].startswith('@'):
                     foundSequence = True
-                    if(fields[0] == previous):    
+                    if(fields[0] == previous):
                         #checks for barcode, if exists barcode will be used as
                         #filename, esle filename set to discard
-                        if len(fields) > 1 and fields[1].startswith('BX:'): 
+                        if len(fields) > 1 and fields[1].startswith('BX:'):
                             barcode = str(cleanBarcode(fields[1])+'_r2')
                             previous =" "
                         else:
@@ -130,14 +131,14 @@ def main():
                     else:
                         #checks for barcode, if exists barcode will be used as
                         #filename, esle filename set to discard
-                        if len(fields) > 1 and fields[1].startswith('BX:'): 
+                        if len(fields) > 1 and fields[1].startswith('BX:'):
                             barcode = str(cleanBarcode(fields[1])+'_r1')
                             previous = fields[0]
                         else:
                             barcode = '~discard'
                 if len(fields) > 0 and foundSequence == True:
                     temp.append(fields)
-                
+
                 #writes 4 lines to file
                 if len(temp) > 3 and foundSequence == True:
                     writeToFile(barcode, temp)
