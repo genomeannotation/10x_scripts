@@ -23,10 +23,10 @@ def main():
 
     #argparse declarations
     parser = argparse.ArgumentParser()
-    parser.add_argument('--windowSize', '--w',help="Enter" + \
+    parser.add_argument('--windowSize', '-w',help="Enter" + \
                                         "  the size of the window.", 
                                         type=int, required = True)
-    parser.add_argument('--inputFile', '--f',help="Enter" + \
+    parser.add_argument('--inputFile', '-f',help="Enter" + \
                                         " the name of the input file.", 
                                         type=str, required = True)
     args=parser.parse_args()
