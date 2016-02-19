@@ -33,12 +33,16 @@ def main():
         barcode = barcode_field.split(":")[2].split("-")[0]
         window = position%window_size
         if window in windows:
-            windows[window].add(barcode)
+            if barcode in windows[window]:
+                windows[window][barcode] += 1
+            else:
+                windows[window][barcode] = 1
         else:
-            windows[window] = set([barcode])
+            windows[window] = {barcode: 1}
 
     for w, barcodes in windows.items():
-        print(str(w) + ':\t' + '\t'.join(list(barcodes)))
+        print(str(w) + ':\t' + '\t'.join([str(count) for _, count in barcodes.items()]))
+        #print(str(w) + ':\t' + str(barcodes))
 
 ####################################################################################################
 
