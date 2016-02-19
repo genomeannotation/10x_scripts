@@ -13,8 +13,20 @@ def printOut(barcodes):
     #sort and remove duplicates
     barcodes = sorted(set(barcodes))
     #send to standard out
-    sys.stdout.write(str(barcodes)) 
-    sys.stdout.write('\n' + '\n')
+    for i in range(len(barcodes)):    
+
+#        sys.stdout.write(str(cleanBarcode(barcodes[i]))) 
+#        sys.stdout.write('\n')
+#    sys.stdout.write('\n')
+#    sys.stdout.write('********************************************************')
+#   sys.stdout.write('\n')
+
+        sys.stdout.write(str(barcodes[i]))
+        sys.stdout.write('\t')
+    sys.stdout.write('\n')
+
+def cleanBarcode(barcode):
+    return barcode[5:-2]
 
 def main():
     
@@ -23,10 +35,10 @@ def main():
 
     #argparse declarations
     parser = argparse.ArgumentParser()
-    parser.add_argument('--windowSize', '--w',help="Enter" + \
+    parser.add_argument('--windowSize', '-w',help="Enter" + \
                                         "  the size of the window.", 
                                         type=int, required = True)
-    parser.add_argument('--inputFile', '--f',help="Enter" + \
+    parser.add_argument('--inputFile', '-f',help="Enter" + \
                                         " the name of the input file.", 
                                         type=str, required = True)
     args=parser.parse_args()
