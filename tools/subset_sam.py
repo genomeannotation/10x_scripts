@@ -22,9 +22,14 @@ def main(args):
 
     for line in sys.stdin:
         fields = line.strip().split()
+        if len(fields) < 4:
+            continue
         seq_id = fields[2]
-        position = int(fields[3])
-        if seq_id in chromosomes and position <= end_pos:
+        try:
+            position = int(fields[3])
+        except:
+            continue
+        if (len(chromosomes) == 0 or seq_id in chromosomes) and position <= end_pos:
             print(line)
 
 
