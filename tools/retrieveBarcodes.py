@@ -11,15 +11,16 @@ import os
 import gzip
 import shutil
 
+
 # appends barcodes into files(forward and backward)
-def writeToFile(fn1, fn2, out):
+def writeToFile(fn1, fn2, out, count):
     if os.path.lexists(fn1):
-        with open('%s_r1.fastq' % out, 'a') as outfile:
+        with open(out+'.'+str(count)+'_r1.fastq' , 'a') as outfile:
             with gzip.open(fn1, 'rb') as infile:
                 for line in infile:
                     outfile.write(line)
     if os.path.lexists(fn2):
-        with open('%s_r2.fastq' % out, 'a') as outfile2:
+        with open(out+'.'+str(count)+'_r2.fastq', 'a') as outfile2:
             with gzip.open(fn2, 'rb') as infile2:
                 for line in infile2:
                     outfile2.write(line)
@@ -33,7 +34,8 @@ def gzipFile(outfile):
 def main():
     barcodes = []
     inputBarcodes = []
-    
+    count = 1
+
     #argparse stuff
     parser = argparse.ArgumentParser()
     parser.add_argument('-b','--barcodes', nargs='+', help='Enter barcodes' + \
@@ -46,9 +48,9 @@ def main():
     args = parser.parse_args()
 
     # creates outfile names
-    outfile1 = args.output+'_r1.fastq'
-    outfile2 = args.output+'_r2.fastq'
-
+    outfile1 = args.output+'.'+str(count)+'_r1.fastq'
+    outfile2 = args.output+'.'+str(count)+'_r2.fastq'
+    
     # using barcode input
     if args.barcodes:
         for i in range(len(args.barcodes)):
@@ -61,9 +63,11 @@ def main():
 
             filename1 = 'barcodes/'+first+'/'+second+'/'+third+'/'+fourth+'/%s_r1.fastq.gz' % l
             filename2 = 'barcodes/'+first+'/'+second+'/'+third+'/'+fourth+'/%s_r2.fastq.gz' % l
-            writeToFile(filename1, filename2, args.output)
-            #print(outfile1, outfile2)
+            writeToFile(filename1, filename2, args.output, count)
+            
 
+            outfile1 = args.output+'.'+str(count)+'_r1.fastq'
+            outfile2 = args.output+'.'+str(count)+'_r2.fastq'
             #gzip output file
             if os.path.lexists(outfile1):
                 gzipFile(outfile1)
@@ -74,6 +78,7 @@ def main():
     if args.barcodeFile:
         with open(args.barcodeFile, 'r') as input:
             for line in input:
+                
                 inputBarcodes = line.strip().split('\t')
             
                 l = str(inputBarcodes[0])
@@ -85,13 +90,17 @@ def main():
 
                 filename1 = 'barcodes/'+first+'/'+second+'/'+third+'/'+fourth+'/%s_r1.fastq.gz' % l 
                 filename2 = 'barcodes/'+first+'/'+second+'/'+third+'/'+fourth+'/%s_r2.fastq.gz' % l
-                writeToFile(filename1,filename2, args.output)
-                #print(filename1," ",filename2)
-            # gzip output file    
-            if os.path.lexists(outfile1):
-                gzipFile(outfile1)
-            if os.path.lexists(outfile2):
-                gzipFile(outfile2)
+                writeToFile(filename1,filename2, args.output, count)
+            
+                # gzip output file
+                outfile1 = args.output+'.'+str(count)+'_r1.fastq'
+                outfile2 = args.output+'.'+str(count)+'_r2.fastq'
+                if os.path.lexists(outfile1):
+                    gzipFile(outfile1)
+                if os.path.lexists(outfile2):
+                    gzipFile(outfile2)
+            
+                count = count + 1
 
 
 ########################################################################################
