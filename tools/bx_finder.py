@@ -21,10 +21,11 @@ def printOut(barcodes):
 #    sys.stdout.write('********************************************************')
 #   sys.stdout.write('\n')
 
-        sys.stdout.write(str(barcodes[i]))
+        sys.stdout.write(str(cleanBarcode(barcodes[i])))
         sys.stdout.write('\t')
     sys.stdout.write('\n')
 
+# cleans barcode, remove bx
 def cleanBarcode(barcode):
     return barcode[5:-2]
 
