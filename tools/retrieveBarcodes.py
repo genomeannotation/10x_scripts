@@ -2,7 +2,7 @@
 # program searches for passed in barcodes and appends them to 2 files
 # separate barcodes with spaces
 # run with:
-# python retrieveBarcodes -f inputFileName -o outputFileName
+# python retrieveBarcodes -f inputFileName.tsv -o outputFileName
 # python retrieveBarcodes -b barcode1 barcode2 barcode3 -o outputFileName
 
 import argparse
@@ -80,17 +80,18 @@ def main():
             for line in input:
                 
                 inputBarcodes = line.strip().split('\t')
-            
-                l = str(inputBarcodes[0])
+               
+                for i in range(len(inputBarcodes)):
+                    l = str(inputBarcodes[i])
 
-                first = l[:1]
-                second = l[1:3]
-                third = l[3:7]
-                fourth = l[7:11]
+                    first = l[:1]
+                    second = l[1:3]
+                    third = l[3:7]
+                    fourth = l[7:11]
 
-                filename1 = 'barcodes/'+first+'/'+second+'/'+third+'/'+fourth+'/%s_r1.fastq.gz' % l 
-                filename2 = 'barcodes/'+first+'/'+second+'/'+third+'/'+fourth+'/%s_r2.fastq.gz' % l
-                writeToFile(filename1,filename2, args.output, count)
+                    filename1 = 'barcodes/'+first+'/'+second+'/'+third+'/'+fourth+'/%s_r1.fastq.gz' % l 
+                    filename2 = 'barcodes/'+first+'/'+second+'/'+third+'/'+fourth+'/%s_r2.fastq.gz' % l
+                    writeToFile(filename1,filename2, args.output, count)
             
                 # gzip output file
                 outfile1 = args.output+'.'+str(count)+'_r1.fastq'
