@@ -47,12 +47,13 @@ def main():
     args = parser.parse_args()
 
     # creates outfile names
-    outfile1 = args.output+'.'+str(count)+'_r1.fastq'
-    outfile2 = args.output+'.'+str(count)+'_r2.fastq'
+    # outfile1 = args.output+'.'+str(count)+'_r1.fastq'
+    # outfile2 = args.output+'.'+str(count)+'_r2.fastq'
     
     # using barcode input
     if args.barcodes:
-        for count, inputBarcode in enumerate(args.barcodes):
+        count = 0
+        for inputBarcode in args.barcodes:
             l = str(inputBarcode)
 
             first = l[:1]
@@ -75,10 +76,10 @@ def main():
     # using fileinput
     if args.barcodeFile:
         with open(args.barcodeFile, 'r') as input:
-            for line in input:
+            for count, line in enumerate(input):
                 inputBarcodes = line.strip().split('\t')
                
-                for count, inputBarcode in enumerate(inputBarcodes):
+                for inputBarcode in inputBarcodes:
                     l = str(inputBarcode)
 
                     first = l[:1]
